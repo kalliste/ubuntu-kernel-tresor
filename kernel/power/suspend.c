@@ -31,6 +31,9 @@
 #include <trace/events/power.h>
 #include <linux/compiler.h>
 #include <linux/moduleparam.h>
+#ifdef CONFIG_CRYPTO_TRESOR_PROMPT
+#include <crypto/tresor.h>
+#endif
 
 #include "power.h"
 
@@ -523,7 +526,12 @@ int suspend_devices_and_enter(suspend_state_t state)
  */
 static void suspend_finish(void)
 {
+#ifdef CONFIG_CRYPTO_TRESOR_PROMPT
+	/* read key before thawing processes */
+	tresor_thaw_processes();
+#else
 	suspend_thaw_processes();
+#endif
 	pm_notifier_call_chain(PM_POST_SUSPEND);
 	pm_restore_console();
 }
